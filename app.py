@@ -4,12 +4,15 @@ import pandas as pd
 import tabula
 
 app = Flask(__name__)
-UPLOAD_FOLDER = '/home/khandekar/Desktop/excel/uploads'
+UPLOAD_FOLDER = 'C:/Users/Prateek/OneDrive/Desktop/sdl_lab'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def pdf_to_dataframe(pdf_file_path):
     tables = tabula.read_pdf(pdf_file_path, pages='all')
     df = tables[0]
+
+    # Ensure the required columns are present in the DataFrame
+    df = df[['Enrollment No.', 'Student Name', 'Marks']]
     return df
 
 def combine_pdfs_to_excel(pdf_files, excel_file_path):
@@ -17,13 +20,16 @@ def combine_pdfs_to_excel(pdf_files, excel_file_path):
 
     for i, pdf_file in enumerate(pdf_files):
         df = pdf_to_dataframe(pdf_file)
-        df = df[['Student Name', 'Marks']]
-        df.columns = ['Student Name', f'Subject{i+1}_Marks']
+        df = df[['Enrollment No.', 'Student Name', 'Marks']]
+        df.columns = ['Enrollment No.', 'Student Name', f'Subject{i+1}_Marks']
 
         if combined_df is None:
             combined_df = df
         else:
-            combined_df = pd.merge(combined_df, df, on='Student Name', how='outer')
+            combined_df = pd.merge(combined_df, df, on=['Enrollment No.', 'Student Name'], how='outer')
+
+    # Fill missing marks with 'Absent'
+    combined_df.fillna('Absent', inplace=True)
 
     combined_df.to_excel(excel_file_path, index=False)
 
