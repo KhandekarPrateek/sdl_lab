@@ -30,7 +30,7 @@
       <div class="col-md-6">
         <h2 class="text-center mb-4">Merge PDF Files and Download Excel</h2>
 
-        <!-- Form for PDF Upload -->
+        <!-- Form for Multiple PDF Uploads -->
         <form
           action="/upload"
           method="POST"
@@ -38,24 +38,18 @@
           class="shadow p-4 rounded bg-light"
         >
           <div class="mb-3">
-            <label for="pdf1" class="form-label">Select First PDF:</label>
+            <label for="pdfs" class="form-label">Select PDF Files:</label>
             <input
               type="file"
-              name="pdf1"
-              id="pdf1"
+              name="pdfs"
+              id="pdfs"
               class="form-control"
+              multiple
               required
             />
-          </div>
-          <div class="mb-3">
-            <label for="pdf2" class="form-label">Select Second PDF:</label>
-            <input
-              type="file"
-              name="pdf2"
-              id="pdf2"
-              class="form-control"
-              required
-            />
+            <small class="form-text text-muted"
+              >You can select multiple PDF files.</small
+            >
           </div>
           <div class="text-center">
             <button type="submit" class="btn btn-primary">

@@ -12,17 +12,18 @@ def pdf_to_dataframe(pdf_file_path):
     df = tables[0]
     return df
 
-def combine_pdfs_to_excel(pdf_file1, pdf_file2, excel_file_path):
-    df1 = pdf_to_dataframe(pdf_file1)
-    df2 = pdf_to_dataframe(pdf_file2)
+def combine_pdfs_to_excel(pdf_files, excel_file_path):
+    combined_df = None
 
-    df1 = df1[['Student Name', 'Marks']]
-    df2 = df2[['Student Name', 'Marks']]
+    for i, pdf_file in enumerate(pdf_files):
+        df = pdf_to_dataframe(pdf_file)
+        df = df[['Student Name', 'Marks']]
+        df.columns = ['Student Name', f'Subject{i+1}_Marks']
 
-    df1.columns = ['Student Name', 'Subject1_Marks']
-    df2.columns = ['Student Name', 'Subject2_Marks']
-
-    combined_df = pd.merge(df1, df2, on='Student Name', how='outer')
+        if combined_df is None:
+            combined_df = df
+        else:
+            combined_df = pd.merge(combined_df, df, on='Student Name', how='outer')
 
     combined_df.to_excel(excel_file_path, index=False)
 
@@ -33,18 +34,19 @@ def upload_form():
 @app.route('/upload', methods=['POST'])
 def upload_files():
     if request.method == 'POST':
-        pdf1 = request.files['pdf1']
-        pdf2 = request.files['pdf2']
-        
-        pdf1_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf1.filename)
-        pdf2_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf2.filename)
-        
-        pdf1.save(pdf1_path)
-        pdf2.save(pdf2_path)
-        
+        pdf_files = request.files.getlist('pdfs')
+
+        # Save each PDF file
+        pdf_paths = []
+        for pdf_file in pdf_files:
+            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], pdf_file.filename)
+            pdf_file.save(pdf_path)
+            pdf_paths.append(pdf_path)
+
+        # Combine and convert to Excel
         excel_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'combined_result.xlsx')
-        combine_pdfs_to_excel(pdf1_path, pdf2_path, excel_file_path)
-        
+        combine_pdfs_to_excel(pdf_paths, excel_file_path)
+
         return send_file(excel_file_path, as_attachment=True)
 
 if __name__ == '__main__':
