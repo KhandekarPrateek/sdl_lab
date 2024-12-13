@@ -12,9 +12,7 @@
     />
 
     <style>
-      /* Full-screen height and flex container setup */
-      body,
-      html {
+      body, html {
         height: 100%;
       }
       .centered-container {
@@ -27,13 +25,11 @@
   </head>
   <body>
     <div class="container centered-container">
-      <div class="col-md-6">
+      <div class="col-md-8">
         <h2 class="text-center mb-4">Merge PDF Files and Download Excel</h2>
 
-        <!-- Form for Multiple PDF Uploads -->
         <form
-          action="/upload"
-          method="POST"
+          id="uploadForm"
           enctype="multipart/form-data"
           class="shadow p-4 rounded bg-light"
         >
@@ -52,15 +48,52 @@
             >
           </div>
           <div class="text-center">
-            <button type="submit" class="btn btn-primary">
-              Merge and Download Excel
+            <button type="button" class="btn btn-primary" id="mergeButton">
+              Merge
+            </button>
+            <button
+              type="button"
+              class="btn btn-success"
+              id="downloadButton"
+              disabled
+            >
+              Download Excel
             </button>
           </div>
         </form>
+
+        <!-- Section to show the merged table -->
+        <div id="mergedDataContainer" class="mt-4"></div>
       </div>
     </div>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      document.getElementById('mergeButton').addEventListener('click', function () {
+        const formData = new FormData(document.getElementById('uploadForm'));
+
+        fetch('/merge', {
+          method: 'POST',
+          body: formData,
+        })
+          .then(response => response.json())
+          .then(data => {
+            // Display merged data in the HTML
+            document.getElementById('mergedDataContainer').innerHTML = data.merged_data;
+
+            // Enable download button
+            document.getElementById('downloadButton').disabled = false;
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      });
+
+      document.getElementById('downloadButton').addEventListener('click', function () {
+        window.location.href = '/download';
+      });
+    </script>
   </body>
 </html>
